@@ -1,14 +1,10 @@
-const stdin = process.openStdin();
+const { readFileSync, writeFileSync } = require("fs");
+const { basename } = require("path");
+const YAML = require("yaml");
+[, , inFile] = process.argv;
+const outFile = `${basename(inFile, ".har")}.yaml`;
 
-let data = "";
-
-stdin.on("data", function (chunk) {
-  data += chunk;
-});
-
-stdin.on("end", function () {
-  console.log(filterHar(data));
-});
+writeFileSync(outFile, filterHar(readFileSync(inFile, "utf8")), "utf8");
 
 function filterHar(harString) {
   const {
@@ -38,12 +34,5 @@ function filterHar(harString) {
       },
     ];
   }, []);
-  return JSON.stringify(result, undefined, 2)
-    .replace(/[{}"\[\]]/g, "")
-    .replace(/:/g, ": ")
-    .replace(/,/g, "")
-    .split("\n")
-    .map((line) => line.slice(4))
-    .filter((line) => line.trim())
-    .join("\n");
+  return YAML.stringify(result);
 }
